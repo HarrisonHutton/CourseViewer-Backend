@@ -1,1 +1,5 @@
+# Ignore workspace settings in VS Code
 **/.vscode/settings.json
+
+# Ignore my python virtual environment
+**/venv/

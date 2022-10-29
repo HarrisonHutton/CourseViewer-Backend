@@ -9,5 +9,5 @@ class CourseInfo:
     course_description: str
     credits: str
     grading: str
-    typically_offered: str
-    requisites: str
+    typically_offered: list[str] = []
+    requisites: str = None

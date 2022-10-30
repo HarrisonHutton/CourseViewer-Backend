@@ -1,0 +1,9 @@
+{
+    "LEC": "Lecture",
+    "LLR": "Lecture",
+    "LR": "Lecture",
+    "LLB": "Lecture + Lab",
+    "TUT": "Tutorial",
+    "SEM": "Seminar",
+    "SR": "Seminar"
+}

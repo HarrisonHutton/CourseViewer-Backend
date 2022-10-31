@@ -2,7 +2,7 @@
 Get the course data from a given department catalog page. The data is returned as a list of CourseInfo objects.
 """
 
-from models.CourseInfo import CourseInfo, CourseTitle
+from models.CourseInfo import CourseInfo, CourseTitle, CourseDescription
 from lxml import html
 import requests
 import json
@@ -15,6 +15,9 @@ class CourseScraper:
         with open("course_types.json") as f:
             self.course_types = json.load(f)
 
+    """
+    Get a list of CourseInfo objects from a given department catalog page.
+    """
     def get_course_data(self, url):
         # Get the HTML from the page
         page = requests.get(url)
@@ -28,9 +31,27 @@ class CourseScraper:
         # Since we only want the courses, we'll get the second accordion.
         course_elements = accordions[1].xpath('.//li')
 
+        courses = []
+
         for course in course_elements:
             name_info: CourseTitle = self.__get_course_name(course)
-            print(name_info)
+            course_description = self.__get_course_description(course)
+
+            info = CourseInfo(
+                name_info.dpt_code,
+                name_info.course_num,
+                name_info.course_type,
+                name_info.course_name,
+                course_description.course_description,
+                course_description.credits,
+                course_description.grading,
+                course_description.typically_offered,
+                course_description.requisites
+            )
+
+            courses.append(info)
+
+        return courses
             
             
 
@@ -76,4 +97,79 @@ class CourseScraper:
         # Finally, return a CourseTitle object containing the relevant information.
         return CourseTitle(dpt_code, course_num, course_type, course_name)
 
-    
+    """
+    Private method that returns a CourseDescription object given an lxml.html.HtmlElement representing all the information of a course.
+    """
+    def __get_course_description(self, course: html.HtmlElement):
+        # First, grab the course description element.
+        course_description_element = course.xpath('div[@class="accordion-content"]')[0]
+
+        # The actual description is in the first paragraph element inside this element.
+        # We use the text_content() method to get the text of the description without any markup to
+        # account for the cases where the description contains HTML tags.
+        course_description = course_description_element.xpath('p[@class="course-description"]')[0].text_content()
+
+        # The credits, grading, typically offered, and requisites information is in the inner HTML of
+        # the only div following the course description paragraph.
+        # So the value below is just a string containing all of this information.
+        course_props = course_description_element.xpath('div')[0].text_content()
+
+        # Since all of this information is in one string, we'll have to parse it to get the individual
+        # pieces of information. 
+        # We'll find the indices of the following substrings and then do math to get to the 
+        # relevant data they address:
+        #     "Credits:"
+        #     "Grading:"
+        #     "Typically Offered:"
+        #     "Requisites:"
+        # The final substring "Requisites:" is optional, so we'll have to check if it exists.
+        # If it doesn't, then we'll just use the length of the string as the index of the end of the
+        # requisites information.
+
+        # First, we'll find the indices of the substrings.
+        credits_index = course_props.find("Credits:")
+        grading_index = course_props.find("Grading:")
+        typically_offered_index = course_props.find("Typically Offered:")
+        requisites_index = course_props.find("Requisites:")
+
+        # Now we'll do some math to get the relevant information.
+
+        # Afterwards we'll strip the whitespace from the beginning and end of the string.
+
+        # The credits information is between the "Credits:" substring and the "Grading:" substring.
+        credits = course_props[credits_index + len("Credits:"):grading_index].strip()
+
+        # The grading information is between the "Grading:" substring and the "Typically Offered:" 
+        # substring.
+        grading = course_props[grading_index + len("Grading:"):typically_offered_index].strip()
+
+        # The typically offered information is between the "Typically Offered:" substring and the 
+        # "Requisites:" substring.
+        #
+        # If the "Requisites:" substring doesn't exist, then we'll just use the length of the 
+        # string as the index.
+
+        if requisites_index == -1:
+            typically_offered = course_props[typically_offered_index + len("Typically Offered:"):].strip()
+        else:
+            typically_offered = course_props[typically_offered_index + len("Typically Offered:"):requisites_index].strip()
+
+        # Convert the typically offered string to a list of strings without spaces
+        typically_offered = typically_offered.split(', ')
+
+        # The requisites information is between the "Requisites:" substring and the end of the string.
+        #
+        # If the "Requisites:" substring doesn't exist, then we'll just use an empty string as the
+        # requisites information.
+        if requisites_index == -1:
+            requisites = ""
+        else:
+            requisites = course_props[requisites_index + len("Requisites:"):].strip()
+
+        return CourseDescription(
+            course_description, 
+            credits, 
+            grading, 
+            typically_offered, 
+            requisites
+        )

@@ -4,8 +4,9 @@ from dataclasses import dataclass
 class CourseInfo:
     dpt_code: str
     course_num: str
-    course_type: str
     course_name: str
+    course_type_abbr: str
+    course_type: str
     course_description: str
     credits: str
     grading: str
@@ -16,11 +17,12 @@ class CourseInfo:
 class CourseTitle:
     dpt_code: str
     course_num: str
-    course_type: str
     course_name: str
+    course_type_abbr: str
 
 @dataclass
 class CourseDescription:
+    course_type: str
     course_description: str
     credits: str
     grading: str

@@ -9,12 +9,6 @@ import json
 
 class CourseScraper:
 
-    def __init__(self):
-        # We'll use the data in this json file as a map between the (<= 3-character) course types
-        # to their corresponding real names.
-        with open("course_types.json") as f:
-            self.course_types = json.load(f)
-
     """
     Get a list of CourseInfo objects from a given department catalog page.
     """
@@ -29,7 +23,14 @@ class CourseScraper:
         accordions = tree.xpath('//ul[@class="accordion"]')
 
         # Since we only want the courses, we'll get the second accordion.
-        course_elements = accordions[1].xpath('.//li')
+        #
+        # However, some departments don't have the learning environment accordion, so we'll 
+        # check if the second accordion exists. If it doesn't, we'll just use the first accordion.
+        if len(accordions) == 2:
+            accordion = accordions[1]
+        else:
+            accordion = accordions[0]
+        course_elements = accordion.xpath('.//li')
 
         courses = []
 
@@ -40,8 +41,9 @@ class CourseScraper:
             info = CourseInfo(
                 name_info.dpt_code,
                 name_info.course_num,
-                name_info.course_type,
                 name_info.course_name,
+                name_info.course_type_abbr,
+                course_description.course_type,
                 course_description.course_description,
                 course_description.credits,
                 course_description.grading,
@@ -88,14 +90,14 @@ class CourseScraper:
 
         # The course type is the everything following the first 3 characters of the second element
         # in the list.
-        course_type = self.course_types[course_name_parts[1][3:]]
+        course_type_abbr = course_name_parts[1][3:]
 
         # Now, since we split by spaces earlier, we have to join the course name back together to 
         # account for spaces in the name.
         course_name = ' '.join(course_name_parts[2:])
 
         # Finally, return a CourseTitle object containing the relevant information.
-        return CourseTitle(dpt_code, course_num, course_type, course_name)
+        return CourseTitle(dpt_code, course_num, course_name, course_type_abbr)
 
     """
     Private method that returns a CourseDescription object given an lxml.html.HtmlElement representing all the information of a course.
@@ -103,6 +105,10 @@ class CourseScraper:
     def __get_course_description(self, course: html.HtmlElement):
         # First, grab the course description element.
         course_description_element = course.xpath('div[@class="accordion-content"]')[0]
+
+        # The course type is in the content of the first strong element under the course 
+        # description element.
+        course_type = course_description_element.xpath('strong/text()')[0]
 
         # The actual description is in the first paragraph element inside this element.
         # We use the text_content() method to get the text of the description without any markup to
@@ -167,6 +173,7 @@ class CourseScraper:
             requisites = course_props[requisites_index + len("Requisites:"):].strip()
 
         return CourseDescription(
+            course_type,
             course_description, 
             credits, 
             grading, 

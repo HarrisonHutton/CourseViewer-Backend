@@ -2,7 +2,7 @@
 Get the course data from a given department catalog page. The data is returned as a list of CourseInfo objects.
 """
 
-from models.CourseInfo import CourseInfo, CourseTitle, CourseDescription
+from web_scraper.models.CourseInfo import CourseInfo, CourseTitle, CourseDescription
 from lxml import html
 import requests
 import json

@@ -5,7 +5,7 @@ catalog URLs for all the departments.
 Source: https://catalog.buffalo.edu/courses/data/subjects.json
 """
 
-from models.CatalogInfo import CatalogInfo
+from web_scraper.models.CatalogInfo import CatalogInfo
 import requests
 import json
 

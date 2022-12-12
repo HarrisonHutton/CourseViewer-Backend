@@ -2,7 +2,7 @@ from database.CoursesDB import CoursesDB
 from database.DatabaseEnum import DatabaseEnum
 from web_scraper.models.CourseInfo import CourseInfo
 
-courses_db = CoursesDB(DatabaseEnum.DEV)
+courses_db = CoursesDB(DatabaseEnum.TEST)
 
 # Create 5 different courses in the format of a CourseInfo object
 courses = [

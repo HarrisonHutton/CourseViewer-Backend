@@ -11,3 +11,6 @@
 
 # Ignore the testdb.py file
 **/testdb.py
+
+# Ignore .DS_Store files
+**/.DS_Store

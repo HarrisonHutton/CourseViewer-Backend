@@ -1,5 +1,6 @@
 from dotenv import load_dotenv, find_dotenv
 from pymongo import MongoClient
+from bson import json_util
 from urllib.parse import quote_plus
 from web_scraper.models.CourseInfo import CourseInfo
 # Import the DatabaseEnum class from this same folder
@@ -15,7 +16,8 @@ password = quote_plus(os.environ.get("CLUSTER_PWD"))
 
 connection_string = f"mongodb+srv://{username}:{password}@course-viewer-data.fs1azkk.mongodb.net/?retryWrites=true&w=majority"
 
-client = MongoClient(connection_string)
+# Currently allowing invalid certificates to speed up development.
+client = MongoClient(connection_string, tls=True, tlsAllowInvalidCertificates=True)
 
 class CoursesDB:
     def __init__(self, db_name: DatabaseEnum):
@@ -32,3 +34,12 @@ class CoursesDB:
     def insert_courses(self, courses: list[CourseInfo]):
         for course in courses:
             self.__insert_course(course)
+
+    def get_dept_courses(self, dpt_code: str):
+        try:
+            courses = self.courses_collection.find({"dpt_code": dpt_code})
+            courses = json_util.dumps(courses)
+            return courses
+        except:
+            print(f"Error: Could not find courses for department code: {dpt_code}")
+            return None

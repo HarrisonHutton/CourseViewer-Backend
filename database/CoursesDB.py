@@ -35,6 +35,15 @@ class CoursesDB:
         for course in courses:
             self.__insert_course(course)
 
+    def get_all_courses(self):
+        try:
+            courses = self.courses_collection.find()
+            courses = json_util.dumps(courses)
+            return courses
+        except:
+            print("Error: Could not find any courses")
+            return None
+
     def get_dept_courses(self, dpt_code: str):
         try:
             courses = self.courses_collection.find({"dpt_code": dpt_code})

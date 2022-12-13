@@ -15,10 +15,19 @@ db = CoursesDB(DatabaseEnum.DEV)
 @app.route('/api/courses')
 def get_all_courses():
     try:
-        courses = db.get_dept_courses("CSE")
+        courses = db.get_all_courses()
         return jsonify(courses)
     except:
         print("Error: Could not find courses")
+        return jsonify({})
+
+@app.route('/api/courses/<dpt_code>', methods=['GET'])
+def get_dept_courses(dpt_code):
+    try:
+        courses = db.get_dept_courses(dpt_code)
+        return jsonify(courses)
+    except:
+        print(f"Error: Could not find courses for department code: {dpt_code}")
         return jsonify({})
 
 if __name__ == '__main__':

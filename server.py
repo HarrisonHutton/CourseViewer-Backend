@@ -22,9 +22,9 @@ def get_all_courses():
         return jsonify({})
 
 @app.route('/api/courses/<dpt_code>', methods=['GET'])
-def get_dept_courses(dpt_code):
+def get_dpt_courses(dpt_code):
     try:
-        courses = db.get_dept_courses(dpt_code)
+        courses = db.get_dpt_courses(dpt_code)
         return jsonify(courses)
     except:
         print(f"Error: Could not find courses for department code: {dpt_code}")

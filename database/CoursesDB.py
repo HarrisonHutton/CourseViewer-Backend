@@ -44,7 +44,7 @@ class CoursesDB:
             print("Error: Could not find any courses")
             return None
 
-    def get_dept_courses(self, dpt_code: str):
+    def get_dpt_courses(self, dpt_code: str):
         try:
             courses = self.courses_collection.find({"dpt_code": dpt_code})
             courses = json_util.dumps(courses)

@@ -3,6 +3,7 @@ from pymongo import MongoClient
 from bson import json_util
 from urllib.parse import quote_plus
 from web_scraper.models.CourseInfo import CourseInfo
+from web_scraper.models.DepartmentInfo import DepartmentInfo
 # Import the DatabaseEnum class from this same folder
 from .DatabaseEnum import DatabaseEnum
 import os
@@ -27,6 +28,8 @@ class CoursesDB:
         self.db = client[db_name.value]
         # This will be the name of the collection in our MongoDB database
         self.courses_collection = self.db.course_collection
+        # This will be the name of the departments collection in our MondoDB database
+        self.departments_collection = self.db.departments_collection
 
     def __insert_course(self, course: CourseInfo):
         self.courses_collection.insert_one(course.to_dict())
@@ -34,6 +37,13 @@ class CoursesDB:
     def insert_courses(self, courses: list[CourseInfo]):
         for course in courses:
             self.__insert_course(course)
+
+    def __insert_department(self, dpt: DepartmentInfo):
+        self.departments_collection.insert_one(dpt.to_dict())
+
+    def insert_departments(self, departments: list[DepartmentInfo]):
+        for dpt in departments:
+            self.__insert_department(dpt)
 
     def get_all_courses(self):
         try:
@@ -51,4 +61,13 @@ class CoursesDB:
             return courses
         except:
             print(f"Error: Could not find courses for department code: {dpt_code}")
+            return None
+
+    def get_departments(self):
+        try:
+            departments = self.courses_collection.distinct("dpt_code")
+            departments = json_util.dumps(departments)
+            return departments
+        except:
+            print("Error: Could not find any departments")
             return None

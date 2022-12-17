@@ -30,5 +30,14 @@ def get_dpt_courses(dpt_code):
         print(f"Error: Could not find courses for department code: {dpt_code}")
         return jsonify({})
 
+@app.route('/api/departments', methods=['GET'])
+def get_departments():
+    try:
+        departments = db.get_departments()
+        return jsonify(departments)
+    except:
+        print(f"Error: Could not find any departments")
+        return jsonify({})
+
 if __name__ == '__main__':
     app.run(debug=True)

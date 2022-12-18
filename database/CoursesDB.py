@@ -63,9 +63,9 @@ class CoursesDB:
             print(f"Error: Could not find courses for department code: {dpt_code}")
             return None
 
-    def get_departments(self):
+    def get_all_departments(self):
         try:
-            departments = self.courses_collection.distinct("dpt_code")
+            departments = self.departments_collection.find()
             departments = json_util.dumps(departments)
             return departments
         except:

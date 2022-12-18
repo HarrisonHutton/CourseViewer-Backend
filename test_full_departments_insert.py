@@ -10,7 +10,7 @@ from web_scraper.models.DepartmentInfo import DepartmentInfo
 
 def test_full_departments_insert():
     # Create a CoursesDB object to insert the courses into the database.
-    courses_db = CoursesDB(DatabaseEnum.TEST)
+    courses_db = CoursesDB(DatabaseEnum.DEV)
 
     # Create a CatalogScraper object to scrape UB's department list.
     catalog_scraper = CatalogScraper()
